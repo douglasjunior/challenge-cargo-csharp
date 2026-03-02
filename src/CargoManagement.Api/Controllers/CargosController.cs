@@ -31,10 +31,7 @@ public class CargosController : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
-        // BUG INTENCIONAL: Paginação quebrada.
-        // Offset deveria ser (page - 1) * pageSize, mas está passando page * pageSize.
-        // O candidato deve identificar e corrigir.
-        var result = await _cargoService.GetAllAsync(page * pageSize, pageSize);
+        var result = await _cargoService.GetAllAsync(page, pageSize);
         return Ok(result);
     }
 

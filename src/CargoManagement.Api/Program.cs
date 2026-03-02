@@ -1,5 +1,6 @@
 using CargoManagement.Api.Data;
 using CargoManagement.Api.DTOs;
+using CargoManagement.Api.Middleware;
 using CargoManagement.Api.Repositories;
 using CargoManagement.Api.Repositories.Interfaces;
 using CargoManagement.Api.Services;
@@ -37,7 +38,11 @@ builder.Services.AddScoped<IValidator<CreateCargoDto>, CargoValidator>();
 builder.Services.AddScoped<IValidator<CreateManifestDto>, ManifestValidator>();
 
 // Controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -63,6 +68,9 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Global Exception Handler
+app.UseMiddleware<GlobalExceptionHandler>();
 
 // Swagger (sempre habilitado para o desafio)
 app.UseSwagger();

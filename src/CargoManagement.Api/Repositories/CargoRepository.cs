@@ -18,10 +18,8 @@ public class CargoRepository : ICargoRepository
     {
         var totalCount = await _context.Cargos.CountAsync();
 
-        // BUG INTENCIONAL: Não faz Include dos Containers.
-        // O CargoService acessa c.Containers.Count, causando N+1 queries.
-        // O candidato deve adicionar .Include(c => c.Containers) aqui.
         var items = await _context.Cargos
+            .Include(c => c.Containers)
             .OrderByDescending(c => c.DataRegistro)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)

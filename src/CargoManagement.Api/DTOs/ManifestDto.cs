@@ -1,14 +1,20 @@
 namespace CargoManagement.Api.DTOs;
 
-// TODO: Candidato deve completar este DTO com as propriedades necessárias
 public class ManifestDto
 {
     public int Id { get; set; }
-    // Adicione as demais propriedades
+    public int CargoId { get; set; }
+    public string Numero { get; set; } = string.Empty;
+    public DateTime DataEmissao { get; set; }
+    public string Despachante { get; set; } = string.Empty;
+    public string? Observacoes { get; set; }
 }
 
 public class CreateManifestDto
 {
     public int CargoId { get; set; }
-    // Adicione as demais propriedades
+    public string Numero { get; set; } = string.Empty;
+    public DateTime DataEmissao { get; set; }
+    public string Despachante { get; set; } = string.Empty;
+    public string? Observacoes { get; set; }
 }

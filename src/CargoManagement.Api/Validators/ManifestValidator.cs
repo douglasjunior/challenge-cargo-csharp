@@ -3,18 +3,23 @@ using FluentValidation;
 
 namespace CargoManagement.Api.Validators;
 
-// TODO: Candidato deve implementar este validator.
-// Use CargoValidator.cs como referência de padrão.
-//
-// Regras esperadas:
-//   - CargoId: obrigatório, maior que zero
-//   - Numero: obrigatório, máximo 50 caracteres
-//   - Despachante: obrigatório, máximo 100 caracteres
-//   - Observacoes: opcional, máximo 500 caracteres
 public class ManifestValidator : AbstractValidator<CreateManifestDto>
 {
     public ManifestValidator()
     {
-        // TODO: Implementar regras de validação
+        RuleFor(x => x.CargoId)
+            .GreaterThan(0).WithMessage("CargoId deve ser maior que zero.");
+
+        RuleFor(x => x.Numero)
+            .NotEmpty().WithMessage("Número é obrigatório.")
+            .MaximumLength(50).WithMessage("Número deve ter no máximo 50 caracteres.");
+
+        RuleFor(x => x.Despachante)
+            .NotEmpty().WithMessage("Despachante é obrigatório.")
+            .MaximumLength(100).WithMessage("Despachante deve ter no máximo 100 caracteres.");
+
+        RuleFor(x => x.Observacoes)
+            .MaximumLength(500).WithMessage("Observações deve ter no máximo 500 caracteres.")
+            .When(x => x.Observacoes is not null);
     }
 }

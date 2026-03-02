@@ -3,17 +3,6 @@ using System.Text.Json;
 
 namespace CargoManagement.Api.Middleware;
 
-// TODO: Candidato deve implementar este middleware de tratamento global de exceções.
-//
-// O middleware deve:
-//   1. Capturar exceções não tratadas
-//   2. Logar a exceção usando ILogger
-//   3. Retornar uma resposta JSON padronizada com:
-//      - StatusCode 500
-//      - Mensagem genérica (não expor detalhes internos)
-//      - Em desenvolvimento, pode incluir detalhes da exceção
-//
-// Referência: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware
 public class GlobalExceptionHandler
 {
     private readonly RequestDelegate _next;
@@ -27,9 +16,25 @@ public class GlobalExceptionHandler
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // TODO: Implementar try/catch que:
-        // 1. Chama _next(context)
-        // 2. Em caso de exceção, loga e retorna JSON de erro
-        await _next(context);
+        try
+        {
+            await _next(context);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exceção não tratada: {Message}", ex.Message);
+            await HandleExceptionAsync(context);
+        }
+    }
+
+    private static async Task HandleExceptionAsync(HttpContext context)
+    {
+        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+        context.Response.ContentType = "application/json";
+
+        var response = new { message = "Ocorreu um erro interno no servidor. Tente novamente mais tarde." };
+        var json = JsonSerializer.Serialize(response);
+
+        await context.Response.WriteAsync(json);
     }
 }

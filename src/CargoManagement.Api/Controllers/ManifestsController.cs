@@ -1,74 +1,86 @@
 using CargoManagement.Api.DTOs;
 using CargoManagement.Api.Services.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CargoManagement.Api.Controllers;
-
-// TODO: Candidato deve implementar este controller.
-// Use CargosController.cs e ContainersController.cs como referência de padrão.
-//
-// Endpoints esperados:
-//   GET    /api/manifests           - Listar todos
-//   GET    /api/manifests/{id}      - Buscar por ID
-//   GET    /api/manifests/por-carga/{cargoId} - Buscar por carga
-//   POST   /api/manifests           - Criar novo (com validação FluentValidation)
-//   PUT    /api/manifests/{id}      - Atualizar
-//   DELETE /api/manifests/{id}      - Remover
 
 [ApiController]
 [Route("api/[controller]")]
 public class ManifestsController : ControllerBase
 {
     private readonly IManifestService _manifestService;
+    private readonly IValidator<CreateManifestDto> _validator;
     private readonly ILogger<ManifestsController> _logger;
 
     public ManifestsController(
         IManifestService manifestService,
+        IValidator<CreateManifestDto> validator,
         ILogger<ManifestsController> logger)
     {
         _manifestService = manifestService;
+        _validator = validator;
         _logger = logger;
     }
 
     [HttpGet]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        // TODO: Implementar
-        return StatusCode(501, new { message = "Endpoint não implementado. Candidato deve implementar." });
+        var manifests = await _manifestService.GetAllAsync();
+        return Ok(manifests);
     }
 
     [HttpGet("{id:int}")]
-    public IActionResult GetById(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        // TODO: Implementar
-        return StatusCode(501, new { message = "Endpoint não implementado. Candidato deve implementar." });
+        var manifest = await _manifestService.GetByIdAsync(id);
+        if (manifest is null)
+            return NotFound(new { message = $"Manifesto com ID {id} não encontrado." });
+
+        return Ok(manifest);
     }
 
     [HttpGet("por-carga/{cargoId:int}")]
-    public IActionResult GetByCargoId(int cargoId)
+    public async Task<IActionResult> GetByCargoId(int cargoId)
     {
-        // TODO: Implementar
-        return StatusCode(501, new { message = "Endpoint não implementado. Candidato deve implementar." });
+        var manifests = await _manifestService.GetByCargoIdAsync(cargoId);
+        return Ok(manifests);
     }
 
     [HttpPost]
-    public IActionResult Create([FromBody] CreateManifestDto dto)
+    public async Task<IActionResult> Create([FromBody] CreateManifestDto dto)
     {
-        // TODO: Implementar com validação FluentValidation
-        return StatusCode(501, new { message = "Endpoint não implementado. Candidato deve implementar." });
+        var validation = await _validator.ValidateAsync(dto);
+        if (!validation.IsValid)
+            return BadRequest(validation.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }));
+
+        var manifest = await _manifestService.CreateAsync(dto);
+        _logger.LogInformation("Manifesto {Numero} criado com ID {Id}", manifest.Numero, manifest.Id);
+
+        return CreatedAtAction(nameof(GetById), new { id = manifest.Id }, manifest);
     }
 
     [HttpPut("{id:int}")]
-    public IActionResult Update(int id, [FromBody] CreateManifestDto dto)
+    public async Task<IActionResult> Update(int id, [FromBody] CreateManifestDto dto)
     {
-        // TODO: Implementar
-        return StatusCode(501, new { message = "Endpoint não implementado. Candidato deve implementar." });
+        var validation = await _validator.ValidateAsync(dto);
+        if (!validation.IsValid)
+            return BadRequest(validation.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }));
+
+        var manifest = await _manifestService.UpdateAsync(id, dto);
+        if (manifest is null)
+            return NotFound(new { message = $"Manifesto com ID {id} não encontrado." });
+
+        return Ok(manifest);
     }
 
     [HttpDelete("{id:int}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        // TODO: Implementar
-        return StatusCode(501, new { message = "Endpoint não implementado. Candidato deve implementar." });
+        var deleted = await _manifestService.DeleteAsync(id);
+        if (!deleted)
+            return NotFound(new { message = $"Manifesto com ID {id} não encontrado." });
+
+        return NoContent();
     }
 }

@@ -5,8 +5,6 @@ using CargoManagement.Api.Services.Interfaces;
 
 namespace CargoManagement.Api.Services;
 
-// TODO: Candidato deve implementar este service.
-// Use CargoService.cs como referência de padrão.
 public class ManifestService : IManifestService
 {
     private readonly IManifestRepository _manifestRepository;
@@ -16,39 +14,51 @@ public class ManifestService : IManifestService
         _manifestRepository = manifestRepository;
     }
 
-    public Task<IEnumerable<Manifest>> GetAllAsync()
+    public async Task<IEnumerable<Manifest>> GetAllAsync()
     {
-        // TODO: Implementar
-        throw new NotImplementedException();
+        return await _manifestRepository.GetAllAsync();
     }
 
-    public Task<Manifest?> GetByIdAsync(int id)
+    public async Task<Manifest?> GetByIdAsync(int id)
     {
-        // TODO: Implementar
-        throw new NotImplementedException();
+        return await _manifestRepository.GetByIdAsync(id);
     }
 
-    public Task<IEnumerable<Manifest>> GetByCargoIdAsync(int cargoId)
+    public async Task<IEnumerable<Manifest>> GetByCargoIdAsync(int cargoId)
     {
-        // TODO: Implementar
-        throw new NotImplementedException();
+        return await _manifestRepository.GetByCargoIdAsync(cargoId);
     }
 
-    public Task<Manifest> CreateAsync(CreateManifestDto dto)
+    public async Task<Manifest> CreateAsync(CreateManifestDto dto)
     {
-        // TODO: Implementar - mapear DTO para entidade e salvar
-        throw new NotImplementedException();
+        var manifest = new Manifest
+        {
+            CargoId = dto.CargoId,
+            Numero = dto.Numero,
+            DataEmissao = dto.DataEmissao,
+            Despachante = dto.Despachante,
+            Observacoes = dto.Observacoes
+        };
+
+        return await _manifestRepository.CreateAsync(manifest);
     }
 
-    public Task<Manifest?> UpdateAsync(int id, CreateManifestDto dto)
+    public async Task<Manifest?> UpdateAsync(int id, CreateManifestDto dto)
     {
-        // TODO: Implementar
-        throw new NotImplementedException();
+        var manifest = await _manifestRepository.GetByIdAsync(id);
+        if (manifest is null) return null;
+
+        manifest.CargoId = dto.CargoId;
+        manifest.Numero = dto.Numero;
+        manifest.DataEmissao = dto.DataEmissao;
+        manifest.Despachante = dto.Despachante;
+        manifest.Observacoes = dto.Observacoes;
+
+        return await _manifestRepository.UpdateAsync(manifest);
     }
 
-    public Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        // TODO: Implementar
-        throw new NotImplementedException();
+        return await _manifestRepository.DeleteAsync(id);
     }
 }

@@ -1,11 +1,10 @@
 using CargoManagement.Api.Data;
 using CargoManagement.Api.Models;
 using CargoManagement.Api.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace CargoManagement.Api.Repositories;
 
-// TODO: Candidato deve implementar este repository usando Entity Framework Core.
-// Use CargoRepository.cs como referência de padrão.
 public class ManifestRepository : IManifestRepository
 {
     private readonly CargoDbContext _context;
@@ -15,39 +14,51 @@ public class ManifestRepository : IManifestRepository
         _context = context;
     }
 
-    public Task<IEnumerable<Manifest>> GetAllAsync()
+    public async Task<IEnumerable<Manifest>> GetAllAsync()
     {
-        // TODO: Implementar
-        throw new NotImplementedException();
+        return await _context.Manifests
+            .Include(m => m.Cargo)
+            .OrderByDescending(m => m.DataEmissao)
+            .ToListAsync();
     }
 
-    public Task<Manifest?> GetByIdAsync(int id)
+    public async Task<Manifest?> GetByIdAsync(int id)
     {
-        // TODO: Implementar
-        throw new NotImplementedException();
+        return await _context.Manifests
+            .Include(m => m.Cargo)
+            .FirstOrDefaultAsync(m => m.Id == id);
     }
 
-    public Task<IEnumerable<Manifest>> GetByCargoIdAsync(int cargoId)
+    public async Task<IEnumerable<Manifest>> GetByCargoIdAsync(int cargoId)
     {
-        // TODO: Implementar
-        throw new NotImplementedException();
+        return await _context.Manifests
+            .Include(m => m.Cargo)
+            .Where(m => m.CargoId == cargoId)
+            .OrderByDescending(m => m.DataEmissao)
+            .ToListAsync();
     }
 
-    public Task<Manifest> CreateAsync(Manifest manifest)
+    public async Task<Manifest> CreateAsync(Manifest manifest)
     {
-        // TODO: Implementar
-        throw new NotImplementedException();
+        _context.Manifests.Add(manifest);
+        await _context.SaveChangesAsync();
+        return manifest;
     }
 
-    public Task<Manifest> UpdateAsync(Manifest manifest)
+    public async Task<Manifest> UpdateAsync(Manifest manifest)
     {
-        // TODO: Implementar
-        throw new NotImplementedException();
+        _context.Manifests.Update(manifest);
+        await _context.SaveChangesAsync();
+        return manifest;
     }
 
-    public Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        // TODO: Implementar
-        throw new NotImplementedException();
+        var manifest = await _context.Manifests.FindAsync(id);
+        if (manifest is null) return false;
+
+        _context.Manifests.Remove(manifest);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }
